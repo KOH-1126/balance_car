@@ -26,6 +26,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app_bat.h"
+#include "app_button.h"
+#include "app.pwm.h"
+#include "pwm_test.h"
 
 /* USER CODE END Includes */
 
@@ -93,8 +96,14 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM2_Init();
   MX_USART2_UART_Init();
+  MX_TIM1_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   App_Bat_Init();
+  User_Key_Init();
+  App_PWM_Init();
+  PWM_Test();
+
 
   /* USER CODE END 2 */
 
@@ -103,6 +112,7 @@ int main(void)
   while (1)
   {
     App_Bat_Proc();
+    User_Key_Proc();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

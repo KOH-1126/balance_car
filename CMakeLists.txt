@@ -46,7 +46,11 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/app_bat.c
     Core/Src/app_usart2.c
+    Core/Src/app_button.c
+    Core/Src/app_pwm.c
+    Core/Src/app_encoder.c
     Test/Src/bat_test.c
+    Test/Src/pwm_test.c
 )
 
 # Add include paths

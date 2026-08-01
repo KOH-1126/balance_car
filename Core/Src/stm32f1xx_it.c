@@ -41,7 +41,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+extern volatile int64_t encoder_L; // 左编码器计数
+extern volatile int64_t encoder_R; // 右编码器计数
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -199,6 +200,20 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles EXTI line3 interrupt.
+  */
+void EXTI3_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI3_IRQn 0 */
+
+  /* USER CODE END EXTI3_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(R_ENCA_Pin);
+  /* USER CODE BEGIN EXTI3_IRQn 1 */
+
+  /* USER CODE END EXTI3_IRQn 1 */
+}
+
+/**
   * @brief This function handles ADC1 and ADC2 global interrupts.
   */
 void ADC1_2_IRQHandler(void)
@@ -212,6 +227,37 @@ void ADC1_2_IRQHandler(void)
   /* USER CODE END ADC1_2_IRQn 1 */
 }
 
+/**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI15_10_IRQn 0 */
+
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(L_ENCA_Pin);
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+
+  /* USER CODE END EXTI15_10_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if(GPIO_Pin == L_ENCA_Pin){ // 左编码器A相检测到上升沿或下降沿时触发
+    uint8_t A = HAL_GPIO_ReadPin(L_ENCA_GPIO_Port, L_ENCA_Pin);
+    uint8_t B = HAL_GPIO_ReadPin(L_ENCB_GPIO_Port, L_ENCB_Pin);
+
+    if(A != B) encoder_L++; // 顺时针旋转
+    else encoder_L--; // 逆时针旋转
+  }
+  else if(GPIO_Pin == R_ENCA_Pin){ // 右编码器A相检测到上升沿或下降沿时触发
+    uint8_t A = HAL_GPIO_ReadPin(R_ENCA_GPIO_Port, R_ENCA_Pin);
+    uint8_t B = HAL_GPIO_ReadPin(R_ENCB_GPIO_Port, R_ENCB_Pin);
+
+    if(A != B) encoder_R++; // 顺时针旋转
+    else encoder_R--; // 逆时针旋转
+  }
+}
 
 /* USER CODE END 1 */
