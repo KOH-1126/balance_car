@@ -34,8 +34,8 @@ void App_PWM_Cmd(uint8_t on){
 void App_PWM_SetDuty_L(float duty)
 {
     uint8_t sign;
-    if(duty >= 0) sign = 1; //正转
-    else sign = 0; //反转
+    if(duty >= 0) sign = 1; //正转 前进
+    else sign = 0; //反转 后退
     duty = fabsf(duty);
     if(sign == 1){
         HAL_GPIO_WritePin(GPIOA, L_IN1_Pin, GPIO_PIN_SET);
@@ -53,8 +53,8 @@ void App_PWM_SetDuty_L(float duty)
 void App_PWM_SetDuty_R(float duty)
 {
     uint8_t sign;
-    if(duty >= 0) sign = 1; //正转
-    else sign = 0; //反转
+    if(duty >= 0) sign = 1; //正转 前进
+    else sign = 0; //反转 后退
     duty = fabsf(duty);
     if(sign == 0){
         HAL_GPIO_WritePin(GPIOB, R_IN1_Pin, GPIO_PIN_SET);

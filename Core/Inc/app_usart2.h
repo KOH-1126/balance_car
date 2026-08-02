@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "main.h"
+#include "usart.h"
 
 /**
  * @brief Format data and send it through USART2.
