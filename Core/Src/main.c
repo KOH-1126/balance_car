@@ -28,7 +28,8 @@
 #include "app_bat.h"
 #include "app_button.h"
 #include "app.pwm.h"
-#include "pwm_test.h"
+// #include "pwm_test.h"
+#include "encoder_test.h"
 
 /* USER CODE END Includes */
 
@@ -102,8 +103,7 @@ int main(void)
   App_Bat_Init();
   User_Key_Init();
   App_PWM_Init();
-  PWM_Test();
-
+  Encoder_Test();
 
   /* USER CODE END 2 */
 

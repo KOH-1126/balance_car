@@ -51,6 +51,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/app_encoder.c
     Test/Src/bat_test.c
     Test/Src/pwm_test.c
+    Test/Src/encoder_test.c
 )
 
 # Add include paths
