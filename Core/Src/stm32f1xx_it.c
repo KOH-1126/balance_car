@@ -245,46 +245,38 @@ void EXTI15_10_IRQHandler(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if(GPIO_Pin == L_ENCA_Pin){ // 左编码器A相检测到上升沿或下降沿时触发
+    t1_L = GetUs(); // 记录左轮编码器计数时间戳
+    deltaTL = t1_L - t0_L; // 计算时间差，单位us
+    t0_L = t1_L; // 更新左轮编码器计数时间戳
     uint8_t A = HAL_GPIO_ReadPin(L_ENCA_GPIO_Port, L_ENCA_Pin);
     uint8_t B = HAL_GPIO_ReadPin(L_ENCB_GPIO_Port, L_ENCB_Pin);
 
     if(A != B) {
       encoder_L++; // 左轮前进
-      direction_L = 1; // 设置左轮方向为前进
+      if (direction_L == -1) direction_L = 2; // 速度由后退变为前进，设置方向为2表示方向改变
+      else direction_L = 1; // 设置左轮方向为前进
     } else {
       encoder_L--; // 左轮后退
-      direction_L = -1; // 设置左轮方向为后退
+      if (direction_L == 1) direction_L = -2; // 速度由前进变为后退，设置方向为-2表示方向改变
+      else direction_L = -1; // 设置左轮方向为后退
     }
-    t1_L = __HAL_TIM_GET_COUNTER(&htim2); // 记录左轮编码器计数时间戳
-    if(t1_L < t0_L) { // 处理计数器溢出情况
-        deltaTL = (10000u - t0_L) + t1_L; // 计算时间差，单位us
-    }
-    else {
-        deltaTL = t1_L - t0_L; // 计算时间差，单位us
-    }
-    omega_L = direction_L/(deltaTL * 1e-6f) * EDGE2ENCODER * ENCODER2WHEEL * WHEEL2DEGREE; // 计算左轮角速度 
-    t0_L = __HAL_TIM_GET_COUNTER(&htim2); // 记录左轮编码器计数时间戳
   }
   else if(GPIO_Pin == R_ENCA_Pin){ // 右编码器A相检测到上升沿或下降沿时触发
+    t1_R = GetUs(); // 记录右轮编码器计数时间戳
+    deltaTR = t1_R - t0_R; // 计算时间差，单位us
+    t0_R = t1_R; // 更新右轮编码器计数时间戳
     uint8_t A = HAL_GPIO_ReadPin(R_ENCA_GPIO_Port, R_ENCA_Pin);
     uint8_t B = HAL_GPIO_ReadPin(R_ENCB_GPIO_Port, R_ENCB_Pin);
 
     if(A != B) {
       encoder_R--; // 右轮后退
-      direction_R = -1; // 设置右轮方向为后退
+      if (direction_R == 1) direction_R = -2; // 速度由前进变为后退，设置方向为-2表示方向改变
+      else direction_R = -1; // 设置右轮方向为后退
     } else {
       encoder_R++; // 右轮前进
-      direction_R = 1; // 设置右轮方向为前进
+      if (direction_R == -1) direction_R = 2; // 速度由后退变为前进，设置方向为2表示方向改变
+      else direction_R = 1; // 设置右轮方向为前进
     }
-    t1_R = __HAL_TIM_GET_COUNTER(&htim2); // 记录右轮编码器计数时间戳
-    if(t1_R < t0_R) { // 处理计数器溢出情况
-        deltaTR = (10000u - t0_R) + t1_R; // 计算时间差，单位us
-    }
-    else {
-        deltaTR = t1_R - t0_R; // 计算时间差，单位us
-    }
-    omega_R = direction_R/(deltaTR * 1e-6f) * EDGE2ENCODER * ENCODER2WHEEL * WHEEL2DEGREE; // 计算右轮角速度
-    t0_R = __HAL_TIM_GET_COUNTER(&htim2); // 记录右轮编码器计数时间戳
   }
 }
 

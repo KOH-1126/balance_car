@@ -9,7 +9,7 @@ void Encoder_Test(void)
 {
     while(1){
         My_USART_Printf(&huart2, "%f, %f\n", Get_Position_L(), Get_Position_R());
-        HAL_Delay(300); // 延时1秒
+        HAL_Delay(300); // 延时300毫秒
     }
 }
 
@@ -19,7 +19,9 @@ void Encoder_Test(void)
 void T_Measure_Test(void)
 {
     while(1){
-        My_USART_Printf(&huart2, "%f, %f, %f, %f\n", Get_Position_L(), Get_Position_R(), omega_L, omega_R);
-        HAL_Delay(300); // 延时1秒
+        My_USART_Printf(&huart2, "%f, %f, %f, %f\n",
+                0.0, (double)Get_Omega_L(),
+                0.0, (double)Get_Omega_R());
+        HAL_Delay(1); // 延时200毫秒
     }
 }

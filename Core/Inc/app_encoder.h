@@ -13,14 +13,19 @@ extern volatile float omega_L;
 extern volatile float omega_R;
 extern volatile int8_t direction_L;
 extern volatile int8_t direction_R;
-extern volatile uint16_t t0_L;
-extern volatile uint16_t t0_R;
-extern volatile uint16_t t1_L;
-extern volatile uint16_t t1_R;
-extern volatile uint16_t deltaTL;
-extern volatile uint16_t deltaTR;
+extern volatile uint64_t t0_L;
+extern volatile uint64_t t0_R;
+extern volatile uint64_t t1_L;
+extern volatile uint64_t t1_R;
+extern volatile uint64_t deltaTL;
+extern volatile uint64_t deltaTR;
 
 float Get_Position_L(void);
 float Get_Position_R(void);
+float Get_Omega_L(void);
+float Get_Omega_R(void);
+
+uint64_t GetUs(void);
+
 
 #endif

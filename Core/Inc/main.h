@@ -85,6 +85,10 @@ void Error_Handler(void);
 #define PWMR_GPIO_Port GPIOB
 #define R_IN2_Pin GPIO_PIN_7
 #define R_IN2_GPIO_Port GPIOB
+#define MPUSCL_Pin GPIO_PIN_8
+#define MPUSCL_GPIO_Port GPIOB
+#define MPUSDA_Pin GPIO_PIN_9
+#define MPUSDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

@@ -49,9 +49,12 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/app_button.c
     Core/Src/app_pwm.c
     Core/Src/app_encoder.c
+    Core/Src/app_mpu6050.c
+    Core/Src/qmath.c
     Test/Src/bat_test.c
     Test/Src/pwm_test.c
     Test/Src/encoder_test.c
+    Test/Src/mpu6050_test.c
 )
 
 # Add include paths
