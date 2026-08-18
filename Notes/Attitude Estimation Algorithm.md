@@ -18,6 +18,26 @@ If $\phi$ is very small, the latter could also be simplified as $\dot{\psi}=r$. 
 
 The emphasis of this project is on keeping roll/$\phi$ around zero.
 
+# $\phi, \theta$ Measured by Accelerometer
+Assuming $\vec{a} = 0$, the output of the accelerometer, $\vec{f}$ equals to $-\vec{g}$。
+Therefore, in the ground frame, $\vec{f}$ could be written as $[0\quad 0 \quad g]^T$ . While in the body frame, $\vec{f}$ should be written as:
+$$
+\begin{align}
+\vec{f} = \left(R_z(\psi)R_y(\theta)R_x(\phi) \right)^{-1}\begin{bmatrix}
+0\\
+0\\
+g
+\end{bmatrix}=\begin{bmatrix}
+-g\sin\theta \\
+g\cos\theta\sin\phi \\
+g\cos\theta\cos\phi
+\end{bmatrix}
+\end{align}
+$$
+Therefore, $\phi = \arctan_{2}{\frac{ay}{az}}$ and $\theta = \arcsin\left( \frac{ax}{g} \right)$. or $\theta = \arctan\left( \frac{ax}{\sqrt{ ay^2 + az^2 }} \right)$, which is more stable because arctan doesn't have a limitation on the domain of definition. 
+(Note: the primary values of three angles are limited as $\phi \in (-\pi,\pi],\theta \in \left[ -\frac{\pi}{2}, \frac{\pi}{2} \right], \psi \in  (-\pi,\pi].$)
+
+ 
 # Roll-Measurement: Complementary Filter
 For an accelerometer, the output $\vec{f}=\vec{a}-\vec{g}$. Only when $\vec{a}=0$, can $\phi$ be calculated as $\phi = \arctan_{2}{\frac{ay}{az}}$. Actually non-zero $\vec{a}$ is caused by vibration, sudden launch and stop, which get high-frequency noise included; For a gyroscope, the static bias and errors accumulated gradually in every linear approximation step both act as low-frequency noise. Therefore, by applying a low-pass filter to the accelerometer and a high-pass filter to the gyroscope, then adding them together, we can gain a ideal measurement for $\phi$.
 ## LPF & HPF (one order)

@@ -106,7 +106,8 @@ int main(void)
   App_Bat_Init();
   User_Key_Init();
   App_PWM_Init();
-  MPU6050_Test();
+  
+  MPU6050_EularAngleTest();
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -14,7 +14,7 @@ static uint16_t binary_search(const float *sorted_arrray, uint16_t array_length,
 
 /**
  * @brief 计算正弦值
- * @param x 角度值（弧度）
+ * @param x 弧度值
  * @return 正弦值
  */
 float qsin(float x){
@@ -58,7 +58,7 @@ float qsin(float x){
 
 /**
  * @brief 计算余弦值
- * @param x 角度值（弧度）
+ * @param x 弧度值
  * @return 余弦值
  */
 float qcos(float x)
@@ -68,7 +68,7 @@ float qcos(float x)
 
 /**
  * @brief 计算正切值
- * @param x 角度值（弧度）
+ * @param x 弧度值
  * @return 正切值
  */
 float qtan(float x){
@@ -103,7 +103,7 @@ float qtan(float x){
  * @return 反正弦值（弧度）
  */
 float qasin(float x){
-    if(fabsf(x) > 1.0f) // 当x的绝对值大于1时，反正弦值不存在
+    if(fabsf(x) > 1.1f) 
     {
         return NAN; // 返回NAN表示无效值
     }
@@ -123,7 +123,7 @@ float qasin(float x){
  * @return 反余弦值（弧度）
  */
 float qacos(float x){
-    if(fabsf(x) > 1.0f) // 当x的绝对值大于1时，反余弦值不存在
+    if(fabsf(x) > 1.1f) // 当x的绝对值大于1.1时，反余弦值不存在
     {
         return NAN; // 返回NAN表示无效值
     }

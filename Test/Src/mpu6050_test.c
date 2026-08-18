@@ -2,6 +2,8 @@
 #include "usart.h"
 #include "app_usart2.h"
 #include "app_mpu6050.h"
+#include "task.h"
+#include "qmath.h"
 
 void MPU6050_Test()
 {
@@ -18,5 +20,21 @@ void MPU6050_Test()
 
         My_USART_Printf(&huart2, "%f, %f, %f, %f, %f, %f, %f\r\n", ax, ay, az, gx, gy, gz, temp);
         HAL_Delay(10);
+    }
+}
+
+static void USART2_Proc()
+{
+    PERIODIC(10)
+    My_USART_Printf(&huart2, "%f, %f, %f, %f\r\n", App_MPU6050_GetRoll(), App_MPU6050_GetPitch(), App_MPU6050_GetYaw(), App_MPU6050_GetTemp());
+} 
+
+void MPU6050_EularAngleTest(void)
+{
+    App_MPU6050_Init();
+    while(1)
+    {
+        App_MPU6050_Proc();
+        USART2_Proc();
     }
 }
