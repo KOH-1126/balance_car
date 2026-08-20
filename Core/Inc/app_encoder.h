@@ -6,6 +6,7 @@
 #define EDGE2ENCODER (1.0f / 22) // 编码器每增加1个计数，编码器转过的圈数
 #define ENCODER2WHEEL (1500.0f / 30613) // 编码器每转一圈，车轮转过的圈数
 #define WHEEL2DEGREE (360.0f) // 车轮转过一圈，车轮转过的角度
+#define WHEEL2RADIAN (6.28318530718f) // 车轮转过一圈，车轮转过的弧度
 
 extern volatile int64_t encoder_L;
 extern volatile int64_t encoder_R;
@@ -24,8 +25,5 @@ float Get_Position_L(void);
 float Get_Position_R(void);
 float Get_Omega_L(void);
 float Get_Omega_R(void);
-
-uint64_t GetUs(void);
-
 
 #endif

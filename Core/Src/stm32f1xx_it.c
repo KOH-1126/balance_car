@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "app_encoder.h"
 #include "tim.h"
+#include "common.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

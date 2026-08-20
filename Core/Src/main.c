@@ -28,10 +28,11 @@
 /* USER CODE BEGIN Includes */
 #include "app_bat.h"
 #include "app_button.h"
-#include "app.pwm.h"
-// #include "pwm_test.h"
-// #include "encoder_test.h"
-#include "mpu6050_test.h"
+#include "app_pwm.h"
+#include "app_encoder.h"
+#include "app_usart2.h"
+#include "app_motor.h"
+#include "common.h"
 
 /* USER CODE END Includes */
 
@@ -53,13 +54,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+static float targetOmega;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+static void USART2_Proc(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -103,19 +104,24 @@ int main(void)
   MX_TIM4_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  App_Bat_Init();
   User_Key_Init();
+  App_Bat_Init();
   App_PWM_Init();
+  App_Motor_Init(); //PID+限幅
   
-  MPU6050_EularAngleTest();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    targetOmega = (HAL_GetTick()/1000) % 10 * 2.0f; 
+    App_Motor_SetSP_L(targetOmega);
+    App_Motor_SetSP_R(targetOmega);
     App_Bat_Proc();
     User_Key_Proc();
+    App_Motor_Proc();
+    USART2_Proc();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -170,6 +176,11 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void USART2_Proc(void){
+  PERIODIC(10)
+
+  My_USART_Printf(&huart2, "%f, %f, %f\r\n", targetOmega, omega_L, omega_R);
+}
 
 /* USER CODE END 4 */
 

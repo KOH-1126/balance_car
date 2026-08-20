@@ -1,6 +1,6 @@
 #include "app_mpu6050.h"
 #include "i2c.h"
-#include "task.h"
+#include "common.h"
 #include "qmath.h"
 
 #define MPU6050_ADDR (0xd0)

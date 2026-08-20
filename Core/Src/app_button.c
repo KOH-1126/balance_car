@@ -1,5 +1,8 @@
 #include "app_button.h"
-#include "app.pwm.h"
+#include "app_pwm.h"
+#include "pid.h"
+
+extern PID_TypeDef pidL, pidR; // 声明pidL和pidR为外部变量
 
 // 通用按钮部分
 
@@ -233,6 +236,11 @@ static void OnUserKey_Clicked(uint8_t clicks)
 {
 	if(clicks == 1){
 		pwm_on = !pwm_on;
-		App_PWM_Cmd(pwm_on);
+		App_PWM_Cmd(pwm_on); // 翻转PWM开关（H桥电路开关）
+		// 如果电机被重新启动，则重置PID控制器
+		if(pwm_on != 0){
+			PID_Reset(&pidL);
+			PID_Reset(&pidR);
+		}
 	}
 }

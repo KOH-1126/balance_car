@@ -1,4 +1,19 @@
+/**
+ ******************************************************************************
+ * @file    common.h
+ * @brief   用于存储一些在不同模块都会用到的宏定义和函数声明
+ */
+#ifndef COMMON_H
+#define COMMON_H
+
 #include "stm32f1xx_hal.h"
+
+/**
+ * @brief 获取系统启动后的微秒级时间戳
+ * @note  需在HAL_Init()完成且SysTick作为HAL时基时调用
+ * @retval 当前时间，单位us
+ */
+uint64_t GetUs(void);
 
 /**
  * @brief 定义一个周期性执行的宏
@@ -23,3 +38,5 @@ if(HAL_GetTick() >= NAME##_nxt) {\
 NAME##_nxt += (T);
 
 #define PERIODIC_END }
+
+#endif
