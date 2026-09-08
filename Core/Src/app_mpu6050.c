@@ -6,9 +6,6 @@
 #define MPU6050_ADDR (0xd0)
 #define ALPHA (0.95238f)
 #define DELTA_T (0.005f)
-#define R2D (57.2958f) // 弧度转角度的系数
-#define D2R (0.0174533f) // 角度转弧度的系数
-// #define g_in_NTU (9.78f) // 1g在NTU的加速度计输出值，单位为g
 
 static float ax, ay, az; // 加速度计数据，单位为g
 static float gx, gy, gz; // 陀螺仪数据，单位为°/s

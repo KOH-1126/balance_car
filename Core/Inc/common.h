@@ -8,6 +8,12 @@
 
 #include "stm32f1xx_hal.h"
 
+#define R2D (57.2958f) // 弧度转角度的系数
+#define D2R (0.0174533f) // 角度转弧度的系数
+#define PI (3.14159265359f)
+#define g_in_NTU (9.78f) // 1g在NTU的加速度计输出值，单位为g
+
+
 /**
  * @brief 获取系统启动后的微秒级时间戳
  * @note  需在HAL_Init()完成且SysTick作为HAL时基时调用
