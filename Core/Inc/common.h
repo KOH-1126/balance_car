@@ -28,8 +28,10 @@ uint64_t GetUs(void);
  */
 #define PERIODIC(T) \
 static uint32_t nxt = 0; \
-if (HAL_GetTick() < nxt) return; \
-nxt += (T);
+uint32_t now = HAL_GetTick(); \
+if (nxt == 0U) nxt = now; \
+if ((int32_t)(now - nxt) < 0) return; \
+nxt = now + (T);
 
 /**
  * @brief 开始一个周期性执行的代码块

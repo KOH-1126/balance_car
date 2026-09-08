@@ -9,12 +9,18 @@
 #define Lp (0.062f) // 倒立摆长度，单位为米
 #define Rw (0.032f) // 轮子半径，单位为米
 
+#define BALANCE_ANGLE_DEG (0.30f)
+#define OMEGA_REF_LIMIT (35.0f)
+#define SPEED_FILTER_TAU_S (0.25f)
+#define SPEED_LOOP_ACCEL_LIMIT (0.12f)
+
 static PID_TypeDef pid_dot_y; // 前进速度的PID控制器
 static PID_TypeDef pid_roll; // 滚转角的PID控制器
 static PID_TypeDef pid_dot_roll; // 滚转角速度的PID控制器
 
 
 static float omega_ref = 0.0f; // 轮子角速度的目标值，单位为rad/s
+static float speed_fb_filtered = 0.0f;
 static uint64_t last_time = 0;
 
 /**
@@ -22,16 +28,17 @@ static uint64_t last_time = 0;
  */
 void App_Control_Init(void)
 {
-    PID_Init(&pid_dot_y, 10.0f, 1.0f, 0.0f); 
-    PID_SetLimits(&pid_dot_y, -0.5f*g_in_NTU, 0.5f*g_in_NTU); // 设置输出上限和下限为-0.5g到0.5g
-    PID_SetSP(&pid_dot_y, 0.0f); // 设置前进速度的目标值为0
+    PID_Init(&pid_dot_y, 0.6f, 0.0f, 0.0f);
+    PID_SetLimits(&pid_dot_y, -SPEED_LOOP_ACCEL_LIMIT, SPEED_LOOP_ACCEL_LIMIT);
+    PID_SetSP(&pid_dot_y, 0.0f);
 
     // 初始化滚转角的PID控制器
-    PID_Init(&pid_roll, 4.0f, 0.0f, 0.0f); // 设置Kp=4.0, Ki=0.0, Kd=0.0
+    PID_Init(&pid_roll, 3.5f, 0.0f, 0.0f);
     PID_SetLimits(&pid_roll, -4*PI, 4*PI); // 设置输出上限和下限为-4π到4π
     PID_SetSP(&pid_roll, 0.0f); // 设置滚转角的目标值为0度
 
-    PID_Init(&pid_dot_roll, 10.0f, 10.0f, 0.0f); // 设置Kp=10.0, Ki=10.0, Kd=0.0
+    /* 调内环阶段先去掉积分，避免积分蓄积造成大幅往复摆动。 */
+    PID_Init(&pid_dot_roll, 22.0f, 0.0f, 0.0f);
     PID_SetLimits(&pid_dot_roll, -40*PI, 40*PI); // 设置输出上限和下限为-40π到40π
 
     last_time = GetUs(); // 初始化last_time为当前时间
@@ -50,25 +57,30 @@ void App_Control_Proc(void)
 
     // ### 速度控制器 起始 #####
 
+    // 获取当前滚转角和滚转角速度
+    float roll = App_MPU6050_GetRoll() * D2R;
+    float dot_roll = App_MPU6050_GetGx() * D2R;
+
+    float roll_ref = BALANCE_ANGLE_DEG * D2R;
     // 设定前进速度的目标值为0
     PID_SetSP(&pid_dot_y, 0.0f);
 
     // 获取车轮转速
     float omega = (Get_Omega_L() + Get_Omega_R()) / 2.0f; // 取左右轮平均值
 
-    // 获取当前滚转角和滚转角速度
-    float roll = App_MPU6050_GetRoll() * D2R;
-    float dot_roll = App_MPU6050_GetGx() * D2R;
-
     // 计算速度环的反馈值 dot_y
     float omega2 = (Lp+Rw)*dot_roll/Rw;
     float dot_y = (omega - omega2)*Rw;
 
     // 计算前进速度的PID输出，输出是前进加速度的参考值 ddot_y_ref
-    float ddot_y_ref = PID_Compute(&pid_dot_y, dot_y);
+    if (deltaT > 0.0f && deltaT < 0.02f) {
+        float alpha = deltaT / (SPEED_FILTER_TAU_S + deltaT);
+        speed_fb_filtered += alpha * (dot_y - speed_fb_filtered);
+    }
 
-    // 计算滚转角的参考值 roll_ref
-    float roll_ref = -qatan(ddot_y_ref/g_in_NTU);
+    // 零速速度环输出前后倾角修正量。
+    float ddot_y_ref = PID_Compute(&pid_dot_y, speed_fb_filtered);
+    roll_ref -= qatan(ddot_y_ref/g_in_NTU);
 
     // 设置滚转角的目标值
     PID_SetSP(&pid_roll, roll_ref);
@@ -88,9 +100,11 @@ void App_Control_Proc(void)
     float ddot_y_ref_rollloop = (Lp*ddot_roll_ref-g_in_NTU*qsin(roll))/qcos(roll)/Rw;
 
     // 积分环节
-    if(deltaT > 5e-3f) // 只有deltaT大于5ms时才进行积分。第一次计算时不需要积分
+    if(deltaT > 0.0f && deltaT < 0.02f)
     {
-        omega_ref += ddot_y_ref_rollloop * deltaT; // 0.005s为采样周期
+        omega_ref += ddot_y_ref_rollloop * deltaT;
+        if (omega_ref > OMEGA_REF_LIMIT) omega_ref = OMEGA_REF_LIMIT;
+        if (omega_ref < -OMEGA_REF_LIMIT) omega_ref = -OMEGA_REF_LIMIT;
     }
 
     // 设置轮子角速度的目标值
@@ -110,6 +124,7 @@ void App_Control_Reset(void){
     // 复位暂存的值
     last_time = GetUs();
     omega_ref = 0.0f;
+    speed_fb_filtered = 0.0f;
 
     // 重置PID控制器
     PID_Reset(&pid_dot_y);

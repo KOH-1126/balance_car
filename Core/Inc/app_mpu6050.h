@@ -4,6 +4,7 @@
 #include "stm32f1xx_hal.h"
 
 void App_MPU6050_Init(void);
+void App_MPU6050_CalibrateGyro(void);
 void App_MPU6050_Update(void);
 void App_MPU6050_Proc(void);
 

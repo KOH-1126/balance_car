@@ -8,12 +8,23 @@
 PID_TypeDef pidL, pidR;
 
 void App_Motor_Init(void){
-    PID_Init(&pidL, 0.5f, 7.0f, 0.0f);
-    PID_Init(&pidR, 0.5f, 7.0f, 0.0f);
+    PID_Init(&pidL, 0.7f, 7.0f, 0.0f);
+    PID_Init(&pidR, 0.7f, 7.0f, 0.0f);
 }
 
 void App_Motor_Proc(void){
     PERIODIC(1)
+
+    float vbat = App_Bat_Get();
+    if (vbat < 1.0f) {
+        App_PWM_SetDuty_L(0.0f);
+        App_PWM_SetDuty_R(0.0f);
+        return;
+    }
+
+    /* PID输出为电机端电压，必须随电池电压限幅。 */
+    PID_SetLimits(&pidL, -vbat, vbat);
+    PID_SetLimits(&pidR, -vbat, vbat);
 
     // 获取左右轮角速度
     float omega_L = Get_Omega_L();
@@ -24,7 +35,6 @@ void App_Motor_Proc(void){
     float ua_R = PID_Compute(&pidR, omega_R);
 
     // 将电压ua转换为占空比duty并加到电机上
-    float vbat = App_Bat_Get();
     float duty_L = ua_L / vbat * 100.0f;
     float duty_R = ua_R / vbat * 100.0f;
 

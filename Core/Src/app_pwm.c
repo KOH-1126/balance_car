@@ -33,6 +33,10 @@ void App_PWM_Cmd(uint8_t on){
 
 void App_PWM_SetDuty_L(float duty)
 {
+    if (!isfinite(duty)) duty = 0.0f;
+    if (duty > 100.0f) duty = 100.0f;
+    if (duty < -100.0f) duty = -100.0f;
+
     uint8_t sign;
     if(duty >= 0) sign = 1; //正转 前进
     else sign = 0; //反转 后退
@@ -52,6 +56,10 @@ void App_PWM_SetDuty_L(float duty)
 
 void App_PWM_SetDuty_R(float duty)
 {
+    if (!isfinite(duty)) duty = 0.0f;
+    if (duty > 100.0f) duty = 100.0f;
+    if (duty < -100.0f) duty = -100.0f;
+
     uint8_t sign;
     if(duty >= 0) sign = 1; //正转 前进
     else sign = 0; //反转 后退
