@@ -63,7 +63,7 @@ void App_Control_Proc(void)
 
     float roll_ref = BALANCE_ANGLE_DEG * D2R;
     // 设定前进速度的目标值为0
-    PID_SetSP(&pid_dot_y, 0.0f);
+    // PID_SetSP(&pid_dot_y, 0.0f);
 
     // 获取车轮转速
     float omega = (Get_Omega_L() + Get_Omega_R()) / 2.0f; // 取左右轮平均值
@@ -130,4 +130,9 @@ void App_Control_Reset(void){
     PID_Reset(&pid_dot_y);
     PID_Reset(&pid_roll);
     PID_Reset(&pid_dot_roll);
+}
+
+void App_Control_SetMoveSpeed(float moveSpeed){
+    // 将移动速度设置为前进速度的PID控制器的目标值
+    PID_SetSP(&pid_dot_y, moveSpeed);
 }

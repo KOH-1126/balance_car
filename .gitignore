@@ -1,4 +1,7 @@
-build
+build/
 mx.scratch
 !.settings
 .obsidian/
+.venv/
+.agents/
+tmp/

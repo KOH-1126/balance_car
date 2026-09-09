@@ -6,5 +6,6 @@
 void App_Control_Init(void);
 void App_Control_Proc(void);
 void App_Control_Reset(void);
+void App_Control_SetMoveSpeed(float moveSpeed);
 
 #endif
