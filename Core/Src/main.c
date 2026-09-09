@@ -34,6 +34,7 @@
 #include "app_motor.h"
 #include "app_control.h"
 #include"app_mpu6050.h"
+#include "app_rc.h"
 #include "common.h"
 
 /* USER CODE END Includes */
@@ -113,6 +114,7 @@ int main(void)
   App_Motor_Init(); //PID+限幅
   App_MPU6050_Init(); //MPU6050初始化
   App_Control_Init(); //控制模块初始化
+  App_RC_Init(); //临时使用USART2接收电脑遥控指令
 
   
   /* USER CODE END 2 */
@@ -126,6 +128,7 @@ int main(void)
     App_Motor_Proc();
     App_MPU6050_Proc();
     App_Control_Proc();
+    App_RC_Proc();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

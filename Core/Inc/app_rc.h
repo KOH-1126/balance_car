@@ -1,0 +1,7 @@
+#ifndef APP_RC_H
+#define APP_RC_H
+
+void App_RC_Init(void);
+void App_RC_Proc(void);
+
+#endif

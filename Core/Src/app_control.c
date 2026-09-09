@@ -11,8 +11,6 @@
 
 #define BALANCE_ANGLE_DEG (0.30f)
 #define OMEGA_REF_LIMIT (35.0f)
-#define SPEED_FILTER_TAU_S (0.25f)
-#define SPEED_LOOP_ACCEL_LIMIT (0.12f)
 
 static PID_TypeDef pid_dot_y; // 前进速度的PID控制器
 static PID_TypeDef pid_roll; // 滚转角的PID控制器
@@ -20,7 +18,6 @@ static PID_TypeDef pid_dot_roll; // 滚转角速度的PID控制器
 
 
 static float omega_ref = 0.0f; // 轮子角速度的目标值，单位为rad/s
-static float speed_fb_filtered = 0.0f;
 static uint64_t last_time = 0;
 
 /**
@@ -28,17 +25,18 @@ static uint64_t last_time = 0;
  */
 void App_Control_Init(void)
 {
-    PID_Init(&pid_dot_y, 0.6f, 0.0f, 0.0f);
-    PID_SetLimits(&pid_dot_y, -SPEED_LOOP_ACCEL_LIMIT, SPEED_LOOP_ACCEL_LIMIT);
+    // 速度环
+    // 例程速度环参数按Rw=0.032m换算到线速度单位。
+    PID_Init(&pid_dot_y, 6.25f, 0.0625f, 0.0f);
+    PID_SetLimits(&pid_dot_y, -g_in_NTU, g_in_NTU);
     PID_SetSP(&pid_dot_y, 0.0f);
 
     // 初始化滚转角的PID控制器
-    PID_Init(&pid_roll, 3.5f, 0.0f, 0.0f);
+    PID_Init(&pid_roll, 7.0f, 7.0f, 0.0f);
     PID_SetLimits(&pid_roll, -4*PI, 4*PI); // 设置输出上限和下限为-4π到4π
     PID_SetSP(&pid_roll, 0.0f); // 设置滚转角的目标值为0度
 
-    /* 调内环阶段先去掉积分，避免积分蓄积造成大幅往复摆动。 */
-    PID_Init(&pid_dot_roll, 22.0f, 0.0f, 0.0f);
+    PID_Init(&pid_dot_roll, 30.0f, 30.0f, 0.0f);
     PID_SetLimits(&pid_dot_roll, -40*PI, 40*PI); // 设置输出上限和下限为-40π到40π
 
     last_time = GetUs(); // 初始化last_time为当前时间
@@ -72,14 +70,8 @@ void App_Control_Proc(void)
     float omega2 = (Lp+Rw)*dot_roll/Rw;
     float dot_y = (omega - omega2)*Rw;
 
-    // 计算前进速度的PID输出，输出是前进加速度的参考值 ddot_y_ref
-    if (deltaT > 0.0f && deltaT < 0.02f) {
-        float alpha = deltaT / (SPEED_FILTER_TAU_S + deltaT);
-        speed_fb_filtered += alpha * (dot_y - speed_fb_filtered);
-    }
-
-    // 零速速度环输出前后倾角修正量。
-    float ddot_y_ref = PID_Compute(&pid_dot_y, speed_fb_filtered);
+    // 直接使用实时速度反馈计算前进加速度参考值。
+    float ddot_y_ref = PID_Compute(&pid_dot_y, dot_y);
     roll_ref -= qatan(ddot_y_ref/g_in_NTU);
 
     // 设置滚转角的目标值
@@ -124,7 +116,6 @@ void App_Control_Reset(void){
     // 复位暂存的值
     last_time = GetUs();
     omega_ref = 0.0f;
-    speed_fb_filtered = 0.0f;
 
     // 重置PID控制器
     PID_Reset(&pid_dot_y);

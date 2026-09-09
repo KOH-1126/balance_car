@@ -28,15 +28,16 @@ void App_RC_Init(void)
 
 void App_RC_Proc(void)
 {
-    if (lineReceivedFlag)
+    if(lineReceivedFlag)
     {
         // 将接收到的数据从transBuffer复制到procBuffer，以便在主循环中处理
         strncpy(procBuffer, transBuffer, MaxCMDLength);
+        procBuffer[MaxCMDLength - 1U] = '\0';
         lineReceivedFlag = 0; // 清除标志位
         // 解析字符串
         if(strncasecmp(procBuffer, "move ", 5) == 0){ // 如果是MOVE指令
-            int8_t turnSpeed, moveSpeed;
-            if(sscanf(procBuffer + 5, "%d%d", &turnSpeed, &moveSpeed) == 2){
+            int turnSpeed, moveSpeed;
+            if(sscanf(procBuffer + 5, "%d %d", &turnSpeed, &moveSpeed) == 2){
                 // 成功解析出两个整数
                 // 在这里执行相应的操作，例如设置电机速度
                 App_Control_SetMoveSpeed(-moveSpeed / 100.0f * 0.7f); // 将移动速度设置为百分比
@@ -50,11 +51,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
     {
         static uint8_t index = 0; // 指向intBuffer的下一个空白位置
         /* 在这里处理 usart3_rx_byte */
-        if(receivedByte != '\n' )
+        if((receivedByte != '\n'))
         {
             intBuffer[index++] = receivedByte;
         }
-        else // 接收到换行符，表示一行数据接收完成
+        else
         {
             intBuffer[index] = '\0'; // 添加字符串结束符
             lineReceivedFlag = 1; // 设置标志位，表示一行数据接收完成

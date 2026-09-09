@@ -52,6 +52,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/app_mpu6050.c
     Core/Src/app_motor.c
     Core/Src/app_control.c
+    Core/app_rc.c
     Core/Src/qmath.c
     Core/Src/pid.c
     Core/Src/common.c
