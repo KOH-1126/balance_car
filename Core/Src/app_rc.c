@@ -41,6 +41,7 @@ void App_RC_Proc(void)
                 // 成功解析出两个整数
                 // 在这里执行相应的操作，例如设置电机速度
                 App_Control_SetMoveSpeed(-moveSpeed / 100.0f * 0.7f); // 将移动速度设置为百分比
+                App_Control_SetTurnSpeed(turnSpeed / 100.0f * 10.0f); // 将转向速度设置为百分比
             }
         }
     }

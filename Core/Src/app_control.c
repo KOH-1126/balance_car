@@ -15,6 +15,7 @@
 static PID_TypeDef pid_dot_y; // 前进速度的PID控制器
 static PID_TypeDef pid_roll; // 滚转角的PID控制器
 static PID_TypeDef pid_dot_roll; // 滚转角速度的PID控制器
+static PID_TypeDef pid_turn; // 转向角速度的PID控制器
 
 
 static float omega_ref = 0.0f; // 轮子角速度的目标值，单位为rad/s
@@ -26,7 +27,6 @@ static uint64_t last_time = 0;
 void App_Control_Init(void)
 {
     // 速度环
-    // 例程速度环参数按Rw=0.032m换算到线速度单位。
     PID_Init(&pid_dot_y, 6.25f, 0.0625f, 0.0f);
     PID_SetLimits(&pid_dot_y, -g_in_NTU, g_in_NTU);
     PID_SetSP(&pid_dot_y, 0.0f);
@@ -36,8 +36,16 @@ void App_Control_Init(void)
     PID_SetLimits(&pid_roll, -4*PI, 4*PI); // 设置输出上限和下限为-4π到4π
     PID_SetSP(&pid_roll, 0.0f); // 设置滚转角的目标值为0度
 
+    // 初始化滚转角速度的PID控制器
     PID_Init(&pid_dot_roll, 30.0f, 30.0f, 0.0f);
     PID_SetLimits(&pid_dot_roll, -40*PI, 40*PI); // 设置输出上限和下限为-40π到40π
+    PID_SetSP(&pid_dot_roll, 0.0f); // 设置滚转角速度的目标值为0度/s
+
+    // 初始化转向角速度的PID控制器
+    PID_Init(&pid_turn, 1.0f, 0.0f, 0.0f);
+    PID_SetLimits(&pid_turn, -15.0f, 15.0f); // 设置输出上限和下限为-15到15
+    PID_SetSP(&pid_turn, 0.0f); // 设置转向角速度的目标值为0rad/s
+
 
     last_time = GetUs(); // 初始化last_time为当前时间
 }
@@ -99,11 +107,19 @@ void App_Control_Proc(void)
         if (omega_ref < -OMEGA_REF_LIMIT) omega_ref = -OMEGA_REF_LIMIT;
     }
 
-    // 设置轮子角速度的目标值
-    App_Motor_SetSP_L(omega_ref);
-    App_Motor_SetSP_R(omega_ref);
-
     // ### 滚转角控制器 结束 #####
+
+    // ### 转向控制器 起始 #####
+
+    float Gz = App_MPU6050_GetGz() * D2R; // 获取陀螺仪的Z轴角速度
+    float turn_ref = PID_Compute(&pid_turn, Gz); // 计算转向角速度的PID输出，作为转向角速度的目标值
+
+    // ###### 转向控制器 结束 #####
+
+    // 设置轮子角速度的目标值
+    App_Motor_SetSP_L(omega_ref + turn_ref);
+    App_Motor_SetSP_R(omega_ref - turn_ref);
+
 
     // 更新时间
     last_time = current_time;
@@ -126,4 +142,9 @@ void App_Control_Reset(void){
 void App_Control_SetMoveSpeed(float moveSpeed){
     // 将移动速度设置为前进速度的PID控制器的目标值
     PID_SetSP(&pid_dot_y, moveSpeed);
+}
+
+void App_Control_SetTurnSpeed(float turnSpeed){
+    // 将转向速度设置为转向角速度的PID控制器的目标值
+    PID_SetSP(&pid_turn, turnSpeed);
 }
