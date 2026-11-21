@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1048" height="624" viewBox="0 0 1048 624" role="img" aria-labelledby="title description">
+  <title id="title">Two-wheel self-balancing robot control diagram</title>
+  <desc id="description">The speed, tilt, and tilt-rate PI cascade feeds an inverted-pendulum model. Yaw-rate feedback provides the differential correction. Independent wheel-speed PI controllers drive the motors through a TB6612. The MPU6050 and wheel encoders provide feedback.</desc>
+  <defs>
+    <marker id="forward-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#344864"/>
+    </marker>
+    <marker id="feedback-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#087e75"/>
+    </marker>
+    <style>
+      text { font-family: Arial, "Segoe UI", sans-serif; fill: #172740; }
+      .section { font-size: 16px; font-weight: 700; }
+      .box { fill: #fff; stroke: #b8c9df; stroke-width: 1.4; }
+      .sensor { fill: #fff; stroke: #91c6bc; stroke-width: 1.4; }
+      .name { font-size: 16px; font-weight: 700; }
+      .detail { fill: #42536c; font-size: 13px; }
+      .signal { fill: #344864; font-size: 13px; }
+      .sense { fill: #086a63; font-size: 13px; }
+      .forward { fill: none; stroke: #344864; stroke-width: 1.7; marker-end: url(#forward-arrow); }
+      .feedback { fill: none; stroke: #087e75; stroke-width: 1.6; stroke-dasharray: 5 4; marker-end: url(#feedback-arrow); }
+    </style>
+  </defs>
+
+  <rect x="1" y="1" width="1046" height="622" rx="19" fill="#fff" stroke="#d7e1eb"/>
+  <rect x="24" y="22" width="1000" height="206" rx="14" fill="#eef4ff"/>
+  <rect x="24" y="264" width="1000" height="174" rx="14" fill="#f2f5f9"/>
+  <rect x="24" y="480" width="1000" height="112" rx="14" fill="#eaf7f4"/>
+
+  <text class="section" x="48" y="49">Longitudinal balance control · 5 ms</text>
+  <text class="signal" x="130" y="81" text-anchor="middle">Speed target v_ref</text>
+  <path class="forward" d="M130 86V103"/>
+
+  <g text-anchor="middle">
+    <rect class="box" x="48" y="103" width="164" height="70" rx="9"/>
+    <text class="name" x="130" y="132">Speed PI</text>
+    <text class="detail" x="130" y="154">Acceleration target</text>
+
+    <rect class="box" x="242" y="103" width="164" height="70" rx="9"/>
+    <text class="name" x="324" y="132">Tilt reference</text>
+    <text class="detail" x="324" y="154">φ₀ − arctan(a_ref/g)</text>
+
+    <rect class="box" x="436" y="103" width="164" height="70" rx="9"/>
+    <text class="name" x="518" y="132">Tilt PI</text>
+    <text class="detail" x="518" y="154">Tilt-rate target</text>
+
+    <rect class="box" x="630" y="103" width="164" height="70" rx="9"/>
+    <text class="name" x="712" y="132">Tilt-rate PI</text>
+    <text class="detail" x="712" y="154">Tilt acceleration target</text>
+
+    <rect class="box" x="824" y="103" width="176" height="70" rx="9"/>
+    <text class="name" x="912" y="132">Pendulum inversion</text>
+    <text class="detail" x="912" y="154">Integrate and clamp</text>
+
+    <text class="sense" x="130" y="211">v̂</text>
+    <text class="sense" x="518" y="211">φ</text>
+    <text class="sense" x="712" y="211">φ̇</text>
+    <text class="sense" x="868" y="211">φ</text>
+  </g>
+
+  <path class="forward" d="M212 138H242"/>
+  <path class="forward" d="M406 138H436"/>
+  <path class="forward" d="M600 138H630"/>
+  <path class="forward" d="M794 138H824"/>
+  <path class="feedback" d="M130 194V173"/>
+  <path class="feedback" d="M518 194V173"/>
+  <path class="feedback" d="M712 194V173"/>
+  <path class="feedback" d="M868 194V173"/>
+  <path class="forward" d="M956 173V245H335V324"/>
+  <text class="signal" x="645" y="239" text-anchor="middle">Common wheel-speed target ω_ref</text>
+
+  <text class="section" x="48" y="291">Steering and motor drive</text>
+  <text class="signal" x="130" y="310" text-anchor="middle">Yaw rate target r_ref</text>
+  <text class="signal" x="740" y="301" text-anchor="middle">Battery voltage (ADC)</text>
+  <path class="forward" d="M130 314V324"/>
+  <path class="forward" d="M740 306V314H538V324"/>
+  <path class="forward" d="M740 314V324"/>
+  <circle cx="740" cy="314" r="2.5" fill="#344864"/>
+
+  <g text-anchor="middle">
+    <rect class="box" x="48" y="324" width="164" height="69" rx="9"/>
+    <text class="name" x="130" y="351">Yaw-rate P</text>
+    <text class="detail" x="130" y="374">Differential Δω · 5 ms</text>
+
+    <rect class="box" x="250" y="324" width="170" height="69" rx="9"/>
+    <text class="name" x="335" y="351">Differential mixer</text>
+    <text class="detail" x="335" y="374">Left +Δω · Right −Δω</text>
+
+    <rect class="box" x="458" y="324" width="160" height="69" rx="9"/>
+    <text class="name" x="538" y="351">Wheel-speed PI</text>
+    <text class="detail" x="538" y="374">Voltage limits · 1 ms</text>
+
+    <rect class="box" x="656" y="324" width="168" height="69" rx="9"/>
+    <text class="name" x="740" y="351">PWM and TB6612</text>
+    <text class="detail" x="740" y="374">Duty cycle and direction</text>
+
+    <rect class="box" x="862" y="324" width="138" height="69" rx="9"/>
+    <text class="name" x="931" y="351">Two-wheel robot</text>
+    <text class="detail" x="931" y="374">Wheels and chassis</text>
+
+    <text class="sense" x="130" y="427">r_z</text>
+    <text class="sense" x="538" y="427">ω_L, ω_R</text>
+  </g>
+
+  <path class="forward" d="M212 358H250"/>
+  <path class="forward" d="M420 358H458"/>
+  <path class="forward" d="M618 358H656"/>
+  <path class="forward" d="M824 358H862"/>
+  <path class="feedback" d="M130 413V393"/>
+  <path class="feedback" d="M538 413V393"/>
+
+  <path class="feedback" d="M931 393V469H502V515"/>
+  <path class="feedback" d="M931 469V515"/>
+  <circle cx="931" cy="469" r="3" fill="#087e75"/>
+  <text class="section" x="48" y="506">Sensors and feedback</text>
+
+  <g text-anchor="middle">
+    <rect class="sensor" x="48" y="515" width="242" height="50" rx="8"/>
+    <text class="name" x="169" y="536">Vehicle speed estimate</text>
+    <text class="sense" x="169" y="555">Wheel speed corrected for tilt rate → v̂</text>
+
+    <rect class="sensor" x="372" y="515" width="260" height="50" rx="8"/>
+    <text class="name" x="502" y="536">MPU6050 attitude filter</text>
+    <text class="sense" x="502" y="555">Tilt φ · Tilt rate φ̇ · Yaw rate r_z</text>
+
+    <rect class="sensor" x="714" y="515" width="286" height="50" rx="8"/>
+    <text class="name" x="857" y="536">Left and right encoders</text>
+    <text class="sense" x="857" y="555">Edge timing → wheel speeds ω_L, ω_R</text>
+  </g>
+
+  <path class="feedback" d="M372 540H290"/>
+  <text class="sense" x="331" y="533" text-anchor="middle">φ̇</text>
+  <path class="feedback" d="M857 565V579H169V565"/>
+  <path class="feedback" d="M49 607H76"/>
+  <text class="detail" x="85" y="611">Matching labels connect feedback signals.</text>
+</svg>
