@@ -23,21 +23,27 @@
 
 ### 车速、平衡和转向闭环
 
-1. **车速外环**。编码器测到的是车轮相对车身的转速。固件从平均轮速换算出的线速度中扣除车身绕轮轴摆动引入的速度分量，再用估算车速闭环。`R_w = 0.032 m` 为轮半径，`L_p = 0.062 m` 为模型中的摆长。
+#### 1. 车速外环
 
-   $$
-   \hat v = R_w\frac{\omega_L+\omega_R}{2}-(L_p+R_w)\dot\phi
-   $$
+编码器测到的是车轮相对车身的转速。固件从平均轮速换算出的线速度中扣除车身绕轮轴摆动引入的速度分量，再用估算车速闭环。`R_w = 0.032 m` 为轮半径，`L_p = 0.062 m` 为模型中的摆长。
 
-   车速 PI 输出期望纵向加速度 $a_{\mathrm{ref}}$，并将其换算为相对静态平衡点的倾角修正，得到 $\phi_{\mathrm{ref}}=0.30^\circ-\arctan(a_{\mathrm{ref}}/g)$。固件把角度统一换算到弧度后计算。
+```math
+\hat v = R_w\frac{\omega_L+\omega_R}{2}-(L_p+R_w)\dot\phi
+```
 
-2. **倾角与倾角角速度环**。倾角 PI 产生目标倾角角速度，角速度 PI 再产生期望倾角角加速度 $\ddot\phi_{\mathrm{ref}}$。用倒立摆模型反解目标轮角加速度，按实际时间间隔积分得到左右轮共用的轮速基准 $\omega_{\mathrm{ref}}$，限幅为 ±35 rad/s。
+车速 PI 输出期望纵向加速度 $a_{\mathrm{ref}}$，并将其换算为相对静态平衡点的倾角修正，得到 $\phi_{\mathrm{ref}}=0.30^\circ-\arctan(a_{\mathrm{ref}}/g)$。固件把角度统一换算到弧度后计算。
 
-   $$
-   \dot\omega_{\mathrm{ref}}=\frac{L_p\ddot\phi_{\mathrm{ref}}-g\sin\phi}{R_w\cos\phi}
-   $$
+#### 2. 倾角与倾角角速度环
 
-3. **转向与双轮闭环**。转向支路对目标偏航角速度与 Z 轴陀螺仪反馈做比例控制，得到差速修正量 $\Delta\omega$。左右目标轮速分别为 $\omega_{\mathrm{ref}}+\Delta\omega$ 和 $\omega_{\mathrm{ref}}-\Delta\omega$。两路轮速 PI 各自根据编码器反馈计算电机端电压目标，按实测电池电压限幅，再换算成有符号 PWM 占空比，由 TB6612 控制电机转向和驱动力。
+倾角 PI 产生目标倾角角速度，角速度 PI 再产生期望倾角角加速度 $\ddot\phi_{\mathrm{ref}}$。用倒立摆模型反解目标轮角加速度，按实际时间间隔积分得到左右轮共用的轮速基准 $\omega_{\mathrm{ref}}$，限幅为 ±35 rad/s。
+
+```math
+\dot\omega_{\mathrm{ref}}=\frac{L_p\ddot\phi_{\mathrm{ref}}-g\sin\phi}{R_w\cos\phi}
+```
+
+#### 3. 转向与双轮闭环
+
+转向支路对目标偏航角速度与 Z 轴陀螺仪反馈做比例控制，得到差速修正量 $\Delta\omega$。左右目标轮速分别为 $\omega_{\mathrm{ref}}+\Delta\omega$ 和 $\omega_{\mathrm{ref}}-\Delta\omega$。两路轮速 PI 各自根据编码器反馈计算电机端电压目标，按实测电池电压限幅，再换算成有符号 PWM 占空比，由 TB6612 控制电机转向和驱动力。
 
 控制环复用同一套 PID 实现。当前车速、倾角、倾角角速度和双轮轮速环使用 PI，转向使用 P。积分采用梯形法，输出饱和时暂停会进一步加深饱和的积分更新。[车身控制](Core/Src/app_control.c) · [电机控制](Core/Src/app_motor.c) · [PID 实现](Core/Src/pid.c)
 
@@ -101,21 +107,27 @@ This two-wheel inverted-pendulum robot runs on an STM32F103. An onboard MPU6050 
 
 ### Speed, Balance, and Steering Loops
 
-1. **Outer vehicle-speed loop.** The encoders measure wheel rotation relative to the chassis. The firmware converts the average wheel speed to a linear speed and subtracts the contribution from chassis rotation about the wheel axle. The speed loop uses the resulting estimate as feedback. In the model, `R_w = 0.032 m` is the wheel radius and `L_p = 0.062 m` is the pendulum length.
+#### 1. Outer vehicle-speed loop
 
-   $$
-   \hat v = R_w\frac{\omega_L+\omega_R}{2}-(L_p+R_w)\dot\phi
-   $$
+The encoders measure wheel rotation relative to the chassis. The firmware converts the average wheel speed to a linear speed and subtracts the contribution from chassis rotation about the wheel axle. The speed loop uses the resulting estimate as feedback. In the model, `R_w = 0.032 m` is the wheel radius and `L_p = 0.062 m` is the pendulum length.
 
-   The speed PI controller outputs a desired longitudinal acceleration $a_{\mathrm{ref}}$. The firmware converts it to a tilt correction around the static balance angle, giving $\phi_{\mathrm{ref}}=0.30^\circ-\arctan(a_{\mathrm{ref}}/g)$. The calculation uses radians internally.
+```math
+\hat v = R_w\frac{\omega_L+\omega_R}{2}-(L_p+R_w)\dot\phi
+```
 
-2. **Tilt and tilt-rate loops.** The tilt PI controller generates a tilt-rate target, and the tilt-rate PI controller outputs the desired tilt acceleration $\ddot\phi_{\mathrm{ref}}$. The firmware inverts the pendulum model to obtain the required wheel angular acceleration, then integrates it using the measured time step. The resulting common wheel-speed target $\omega_{\mathrm{ref}}$ is limited to ±35 rad/s.
+The speed PI controller outputs a desired longitudinal acceleration $a_{\mathrm{ref}}$. The firmware converts it to a tilt correction around the static balance angle, giving $\phi_{\mathrm{ref}}=0.30^\circ-\arctan(a_{\mathrm{ref}}/g)$. The calculation uses radians internally.
 
-   $$
-   \dot\omega_{\mathrm{ref}}=\frac{L_p\ddot\phi_{\mathrm{ref}}-g\sin\phi}{R_w\cos\phi}
-   $$
+#### 2. Tilt and tilt-rate loops
 
-3. **Steering and wheel-speed loops.** A proportional controller compares the commanded yaw rate with the Z-axis gyro rate to compute a differential correction $\Delta\omega$. The left and right wheel targets are $\omega_{\mathrm{ref}}+\Delta\omega$ and $\omega_{\mathrm{ref}}-\Delta\omega$, respectively. Each wheel-speed PI loop uses encoder feedback to compute a motor terminal voltage. The firmware caps the magnitude at the measured battery voltage and converts the command to a signed PWM duty cycle for the TB6612 motor driver.
+The tilt PI controller generates a tilt-rate target, and the tilt-rate PI controller outputs the desired tilt acceleration $\ddot\phi_{\mathrm{ref}}$. The firmware inverts the pendulum model to obtain the required wheel angular acceleration, then integrates it using the measured time step. The resulting common wheel-speed target $\omega_{\mathrm{ref}}$ is limited to ±35 rad/s.
+
+```math
+\dot\omega_{\mathrm{ref}}=\frac{L_p\ddot\phi_{\mathrm{ref}}-g\sin\phi}{R_w\cos\phi}
+```
+
+#### 3. Steering and wheel-speed loops
+
+A proportional controller compares the commanded yaw rate with the Z-axis gyro rate to compute a differential correction $\Delta\omega$. The left and right wheel targets are $\omega_{\mathrm{ref}}+\Delta\omega$ and $\omega_{\mathrm{ref}}-\Delta\omega$, respectively. Each wheel-speed PI loop uses encoder feedback to compute a motor terminal voltage. The firmware caps the magnitude at the measured battery voltage and converts the command to a signed PWM duty cycle for the TB6612 motor driver.
 
 The loops share a PID implementation configured as PI for vehicle speed, tilt, tilt rate, and wheel speed, and as P for yaw rate. It uses trapezoidal integration and skips integral updates that would drive a saturated output further into saturation. [Balance controller](Core/Src/app_control.c) · [Motor controller](Core/Src/app_motor.c) · [PID implementation](Core/Src/pid.c)
 
